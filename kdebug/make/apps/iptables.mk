@@ -14,6 +14,7 @@ config:
 
 install:
 	find $(SOURCE)/ -perm 775 -a ! -name ".deps" -a ! -type d | xargs -i $(INSTALL) {} $(ROOT_DIR)/bin/
+	cd $(ROOT_DIR)/bin && ln -sf xtables-multi iptables && ln -sf xtables-multi ip6tables
 
 clean:
 	@cd $(SOURCE) && make clean

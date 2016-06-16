@@ -19,8 +19,10 @@ mount -t devpts devpts /dev/pts
 mdev -s
 
 ifconfig eth0 up
-ifconfig eth0 10.71.1.163 netmask 255.255.255.0 hw ether 040000000003
+ifconfig eth0 10.71.1.161 netmask 255.255.255.0 hw ether 040000000101
 ifconfig lo up
+ip r a 0.0.0.0/0 via 10.71.1.162
+ip r a 0.0.0.0/0 via 10.71.1.254
 
 ssh-keygen -t rsa1 -f /usr/local/etc/ssh_host_key -N ""
 ssh-keygen -t rsa -f /usr/local/etc/ssh_host_rsa_key -N ""

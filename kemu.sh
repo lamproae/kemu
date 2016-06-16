@@ -7,6 +7,10 @@ sudo apt-get -y install vim make qemu bc
 mkdir -p $top/tools
 mkdir -p $top/tar
 
+# For brctl and tunctl
+sudo apt-get -y install bridge-utils
+sudo apt-get -y install uml-utilities
+
 cd $top/tools 
 if [ ! -d crosstool-ng ]; then
     #

@@ -59,6 +59,9 @@ config:
 lib:
 	$(MAKE) -f $@.mk 
 
+host1 host2 router:
+	sh $(SCRIPT_DIR)/build-sample-os.sh $@
+
 clean:
 	$(MAKE) -f lib.mk $@
 	$(MAKE) -f apps.mk $@

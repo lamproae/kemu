@@ -17,9 +17,6 @@ endif
 
 all: prepare config build 
 
-boot:
-	sh $(SCRIPT_DIR)/boot.sh
-
 prepare: 
 	@case $(ARCH) in  \
 		x86_64 | arm)	\
@@ -42,6 +39,12 @@ config:
 
 lib:
 	$(MAKE) -C $(PROJECT_DIR)/make $@
+
+boot: host1
+
+host1 host2 router: 
+	$(MAKE) -C $(PROJECT_DIR)/make $@
+	sh $(SCRIPT_DIR)/boot.sh $@
 
 clean:
 	$(MAKE) -C $(PROJECT_DIR)/make $@

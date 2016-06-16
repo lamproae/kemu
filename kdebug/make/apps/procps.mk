@@ -12,7 +12,7 @@ $(SOURCE)/curses.h:
 
 config:
 	@if [ ! -f $(SOURCE)/Makefile ]; then \
-	    cd $(SOURCE) &&  ./configure --host=$(ARCH) CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"  --with-ncurses-dir=$(APPS_DIR)/ncurses/ncurses-5.4;   \
+	    cd $(SOURCE) && chmod a+x ./configure && ./configure --host=$(ARCH) CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"  --with-ncurses-dir=$(APPS_DIR)/ncurses/ncurses-5.4;   \
 	fi
 
 

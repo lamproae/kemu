@@ -92,6 +92,33 @@ if [ ! -d bash-4.3 ]; then
     cp -a tar/bash-4.3 $top/kdebug/apps/bash/
 fi
 
+cd $top/tar 
+if [ ! -d ncurses-5.4 ]; then
+    curl -o ncurses-5.4.tar.gz http://ftp.gnu.org/gnu/ncurses/ncurses-5.4.tar.gz \
+        && tar -zxvf ncurses-5.4.tar.gz 
+    cd ..
+    mkdir -p $top/kdebug/apps/ncurses
+    cp -a tar/ncurses-5.4 $top/kdebug/apps/ncurses/
+fi
+
+cd $top/tar 
+if [ ! -d ncurses-5.4 ]; then
+    curl -o ncurses-5.4.tar.gz http://ftp.gnu.org/gnu/ncurses/ncurses-5.4.tar.gz \
+        && tar -zxvf ncurses-5.4.tar.gz 
+    cd ..
+    mkdir -p $top/kdebug/apps/ncurses
+    cp -a tar/ncurses-5.4 $top/kdebug/apps/ncurses/
+fi
+
+cd $top/tar 
+if [ ! -d procps-3.2.8 ]; then
+    git clone https://github.com/lamproae/procps-3.2.8.git
+    cd ..
+    mkdir -p $top/kdebug/apps/procps
+    cp -a tar/procps-3.2.8 $top/kdebug/apps/procps/
+fi
+
+
 cd $top
 # RUN apt-get update
 # RUN apt-get -y install vim make

@@ -111,6 +111,15 @@ if [ ! -d ncurses-5.4 ]; then
 fi
 
 cd $top/tar 
+if [ ! -d iptables-1.4.20 ]; then
+    curl -o iptables-1.4.20.tar.bz2 http://www.netfilter.org/projects/iptables/files/iptables-1.4.20.tar.bz2 \
+        && tar -jxvf iptables-1.4.20.tar.bz2 
+    cd ..
+    mkdir -p $top/kdebug/apps/iptables
+    cp -a tar/iptables-1.4.20 $top/kdebug/apps/iptables
+fi
+
+cd $top/tar 
 if [ ! -d procps-3.2.8 ]; then
     git clone https://github.com/lamproae/procps-3.2.8.git
     cd ..

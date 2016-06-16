@@ -13,3 +13,4 @@ enable_openssh=no
 enable_coreutils=yes
 enable_inetutils=yes
 enable_procps=yes
+enable_iptables=yes

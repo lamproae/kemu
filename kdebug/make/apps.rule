@@ -1,3 +1,4 @@
+enable_ncurses=yes
 enable_bash=yes
 enable_busybox=yes
 enable_iproute2=no
@@ -11,3 +12,4 @@ enable_strace=no
 enable_openssh=no
 enable_coreutils=yes
 enable_inetutils=yes
+enable_procps=yes

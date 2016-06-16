@@ -119,6 +119,13 @@ if [ ! -d procps-3.2.8 ]; then
 fi
 
 cd $top/tar 
+if [ ! -d iproute2 ]; then
+    git clone https://github.com/lamproae/iproute2.git
+    cd ..
+    cp -a tar/iproute2 $top/kdebug/apps/iproute2
+fi
+
+cd $top/tar 
 if [ ! -d tcpdump-4.7.4 ]; then 
     curl -o tcpudmp-4.7.4.tar.gz http://www.tcpdump.org/release/tcpdump-4.7.4.tar.gz \
         && tar -zxvf tcpdump-4.7.4.tar.gz \

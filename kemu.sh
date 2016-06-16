@@ -118,6 +118,17 @@ if [ ! -d procps-3.2.8 ]; then
     cp -a tar/procps-3.2.8 $top/kdebug/apps/procps/
 fi
 
+cd $top/tar 
+if [ ! -d tcpdump-4.7.4 ]; then 
+    curl -o tcpudmp-4.7.4.tar.gz http://www.tcpdump.org/release/tcpdump-4.7.4.tar.gz \
+        && tar -zxvf tcpdump-4.7.4.tar.gz \
+    && curl -o libpcap-1.6.2.tar.gz http://www.tcpdump.org/release/libpcap-1.6.2.tar.gz \
+    && tar -zxvf libpcap-1.6.2.tar.gz
+    cd ..
+    mkdir -p $top/kdebug/apps/tcpdump
+    cp -a tar/tcpdump-4.7.4 $top/kdebug/apps/tcpdump/
+    cp -a tar/libpcap-1.6.2 $top/kdebug/apps/tcpdump/
+fi
 
 cd $top
 # RUN apt-get update

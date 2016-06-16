@@ -1,7 +1,7 @@
 enable_ncurses=yes
 enable_bash=yes
 enable_busybox=yes
-enable_iproute2=no
+enable_iproute2=yes
 enable_sh-utils=no
 enable_systemd=no
 enable_sysvinit=no

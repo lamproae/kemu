@@ -11,10 +11,6 @@ fi
 
 # User specific aliases and functions
 
-
-export CVSROOT=:pserver:liwei@ddcvs.dasannetworks.com:/home/ddcvs/ddSource
-#export CSCOPE_DB=/home/humy/code/v1916gr/dbase/cscope.out
-
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 

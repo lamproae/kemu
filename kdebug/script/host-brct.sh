@@ -12,7 +12,7 @@ sudo brctl sethello br0 1
 sudo ifconfig br0 0.0.0.0 promisc up
 sudo ifconfig eth0 0.0.0.0 promisc up
 
-sudo ifconfig br0 10.71.1.161 netmask 255.255.255.0
+sudo ifconfig br0 10.71.1.193 netmask 255.255.255.0
 sudo route add -net 0.0.0.0 netmask 0.0.0.0 gw 10.71.1.254
 
 sudo brctl show br0

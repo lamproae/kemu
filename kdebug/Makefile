@@ -40,6 +40,9 @@ config:
 lib:
 	$(MAKE) -C $(PROJECT_DIR)/make $@
 
+reset:
+	$(MAKE) -C $(PROJECT_DIR)/make $@
+
 boot: host1
 
 mboot: host1 host2 router

@@ -59,8 +59,11 @@ config:
 lib:
 	$(MAKE) -f $@.mk 
 
+reset:
+	sh $(SCRIPT_DIR)/host-brct.sh reset
+
 host1 host2 router:
-	sh $(SCRIPT_DIR)/host-brct.sh 
+	sh $(SCRIPT_DIR)/host-brct.sh set
 	sh $(SCRIPT_DIR)/build-sample-os.sh $@
 
 clean:

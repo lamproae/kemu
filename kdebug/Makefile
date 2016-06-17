@@ -42,6 +42,8 @@ lib:
 
 boot: host1
 
+mboot: host1 host2 router
+
 host1 host2 router: 
 	$(MAKE) -C $(PROJECT_DIR)/make $@
 	sh $(SCRIPT_DIR)/boot.sh $@

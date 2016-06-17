@@ -60,6 +60,7 @@ lib:
 	$(MAKE) -f $@.mk 
 
 host1 host2 router:
+	sh $(SCRIPT_DIR)/host-brct.sh 
 	sh $(SCRIPT_DIR)/build-sample-os.sh $@
 
 clean:

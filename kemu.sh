@@ -37,12 +37,16 @@ if [ ! -d crosstool-ng ]; then
         && ct-ng build
 fi
 
-# cd $top/ 
-# if [ ! -d kdebug ]; then
-#    git clone https://github.com/lamproae/kdebug.git
-#    cd $top/ && mkdir -p $top/kdebug/tools/toolchain/x86_64
-#    cp -a $HOME/x-tools/x86_64-unknown-linux-gnu $top/kdebug/tools/toolchain/x86_64
-# fi
+cd $top/ 
+if [ ! -d kdebug ]; then
+    git clone https://github.com/lamproae/kdebug.git
+fi
+
+cd $top/ 
+if [ ! -d kdebug/tools/toolchain/x86_64 ]; then
+    mkdir -p $top/kdebug/tools/toolchain/x86_64
+    cp -a $HOME/x-tools/x86_64-unknown-linux-gnu $top/kdebug/tools/toolchain/x86_64
+fi
 
 # Get kernel source code
 cd $top/tar 
@@ -140,10 +144,10 @@ fi
 
 cd $top/tar 
 if [ ! -d tcpdump-4.7.4 ]; then 
-    curl -o tcpudmp-4.7.4.tar.gz http://www.tcpdump.org/release/tcpdump-4.7.4.tar.gz \
-        && tar -zxvf tcpdump-4.7.4.tar.gz \
-    && curl -o libpcap-1.6.2.tar.gz http://www.tcpdump.org/release/libpcap-1.6.2.tar.gz \
-    && tar -zxvf libpcap-1.6.2.tar.gz
+    curl -o tcpdump-4.7.4.tar.gz http://www.tcpdump.org/release/tcpdump-4.7.4.tar.gz \
+        && tar -zxvf tcpdump-4.7.4.tar.gz 
+    curl -o libpcap-1.6.2.tar.gz http://www.tcpdump.org/release/libpcap-1.6.2.tar.gz \
+        && tar -zxvf libpcap-1.6.2.tar.gz
     cd ..
     mkdir -p $top/kdebug/apps/tcpdump
     cp -a tar/tcpdump-4.7.4 $top/kdebug/apps/tcpdump/

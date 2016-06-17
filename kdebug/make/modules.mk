@@ -1,6 +1,6 @@
 MODULES = $(shell sed -n 's/enable_\(.*\)=yes/\1/p' ./modules.rule)
 
-all: 
+all: modules_build modules_install
 
 modules: modules_build modules_install
 

@@ -3,6 +3,7 @@ all: etc lib
 etc:
 	$(call print_build,etc, dk)
 	$(CP) -a $(PROJECT_DIR)/samples/rootfs/etc $(ROOT_DIR)
+	$(CP) -a $(PROJECT_DIR)/samples/tools/* $(ROOT_DIR)/bin
 	$(CHMOD) a+x $(ROOT_DIR)/etc/init.d/rcS
 	cd $(ROOT_DIR) && ln -sf sbin/init init
 #	$(CHOWN) root -R $(ROOT_DIR)/etc

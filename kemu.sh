@@ -10,6 +10,9 @@ mkdir -p $top/tar
 # For brctl and tunctl
 sudo apt-get -y install bridge-utils
 sudo apt-get -y install uml-utilities
+sudo apt-get -y install golang
+sudo apt-get -y install ssh
+sudo apt-get -y install git
 
 cd $top/tools 
 if [ ! -d crosstool-ng ]; then

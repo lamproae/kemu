@@ -7,7 +7,7 @@ MODULES_DIR	=	$(PROJECT_DIR)/modules
 KERNEL_DIR	=	$(PROJECT_DIR)/kernel
 SCRIPT_DIR	=	$(PROJECT_DIR)/script
 
-BUILD_DIR	=	$(PROJECT_DIR)/build
+BUILD_DIR	=	$(PROJECT_DIR)/result/build
 ROOT_DIR	=	$(PROJECT_DIR)/rootfs
 MODULES_DIR	=	$(PROJECT_DIR)/modules
 

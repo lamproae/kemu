@@ -157,6 +157,32 @@ if [ ! -d tcpdump-4.7.4 ]; then
     cp -a tar/libpcap-1.6.2 $top/kdebug/apps/tcpdump/
 fi
 
+cd $top/tar 
+if [ ! -d strace-4.8 ]; then
+    curl -o strace-4.8.tar.xz http://pkgs.fedoraproject.org/repo/pkgs/strace/strace-4.8.tar.xz/c575ef43829586801f514fd91bfe7575/strace-4.8.tar.xz \
+        && xz -d strace-4.8.tar.xz && tar -xvf strace-4.8.tar 
+    cd ..
+    mkdir -p $top/kdebug/apps/strace
+    cp -a tar/strace-4.8 $top/kdebug/apps/strace/
+fi
+
+cd $top/tar 
+if [ ! -d quagga ]; then 
+    git clone https://github.com/lamproae/quagga.git
+    cd ..
+    mkdir -p $top/kdebug/apps/quagga
+    cp -a tar/quagga $top/kdebug/apps/quagga
+fi
+
+cd $top/tar 
+if [ ! -d strace-4.1.0 ]; then
+    curl -o strace-4.1.0.tar.xz http://ftp.gnu.org/gnu/gawk/gawk-4.1.0.tar.xz \
+        && tar -zxvf strace-4.1.0.tar.xz 
+    cd ..
+    mkdir -p $top/kdebug/apps/strace
+    cp -a tar/strace-4.1.0 $top/kdebug/apps/strace/
+fi
+
 cd $top
 # RUN apt-get update
 # RUN apt-get -y install vim make

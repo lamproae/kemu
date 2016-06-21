@@ -51,6 +51,6 @@ elif [ $1 = "reset" ];then
     sudo ifconfig tap4 down
     sudo ifconfig tap5 down
     sudo brctl delbr br0
-    sleep 1
+    sleep 2
     sudo ifconfig eth0 up
 fi

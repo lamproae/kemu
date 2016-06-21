@@ -9,6 +9,7 @@ mkdir -p /sys
 mkdir -p /var/empty
 mkdir -p /var/run
 mkdir -p /var/log
+mkdir -p /var/tmp
 mkdir -p /dev/pts
 touch /var/log/wtmpx
 
@@ -38,6 +39,8 @@ inetd /etc/inetd.conf
 klogd
 syslogd
 /sbin/sshd
+touch /var/run/zebra.pid
+zebra -d -f /etc/zebra.conf.sample -i /var/run/zebra.pid
 
 hostname mithrandir
 

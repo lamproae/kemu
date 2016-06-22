@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -21,9 +22,14 @@ var tmpl = `<!DOCTYPE html>
 </head>
 
 <body>
+{{range .Inst}}
+<table border="1">
+<p color="red"><b><a href={{.Root}}-----{{.Index}}>{{.Root}}</a></b></p>
 {{range .Funcs}}
-<p><a href={{.}}>{{.}}</a> </p>
-	{{end}}
+<p> <tr><a href={{.Name}}-----{{.Index}}>{{.Name}}</a> </tr> </p>
+{{end}}
+</table>
+{{end}}
 </body>
 </html>
 `
@@ -44,12 +50,29 @@ type CFunc struct {
 	calling []*CFunc
 }
 
-type CFuncs struct {
-	Funcs []string
+type Temp struct {
+	Name  string
+	Index int
 }
+type CInstance struct {
+	Index int
+	Root  string
+	Funcs []*Temp
+}
+
+type CInstances struct {
+	Inst []*CInstance
+}
+
+type CFuncInstance struct {
+	index int
+	root  *CFunc
+	list  map[string]*CFunc
+}
+
 type CFuncCallTree struct {
-	root *CFunc
-	list map[string]*CFunc
+	name      string
+	instances []*CFuncInstance
 }
 
 /*
@@ -90,6 +113,7 @@ type CallTreeSPF struct {
 	vertex map[string]*SPFVertex
 	rows   map[int][]*SPFVertex
 	level  int
+	index  int
 }
 
 type SPFVertex struct {
@@ -98,6 +122,8 @@ type SPFVertex struct {
 	drawed   bool
 	children []*SPFVertex
 }
+
+var CallForrest = make([]*CallTreeSPF, 0, 10)
 
 var constGraph = Graph{gw: 4000, gh: 4000, ew: 0, eh: 15, sw: 1000, sh: 40, deltaw: 20, deltah: 40, pix: 5}
 
@@ -129,8 +155,8 @@ func (spf *CallTreeSPF) getSubVertex(v *CFunc) {
 	}
 }
 
-func (spf *CallTreeSPF) getVertex() error {
-	if r, ok := CTreeRoot.list[spf.root]; ok {
+func (spf *CallTreeSPF) getVertex(inst *CFuncInstance) error {
+	if r, ok := inst.list[spf.root]; ok {
 		spf.vertex = make(map[string]*SPFVertex, 200)
 		nv := new(SPFVertex)
 		nv.fn = r
@@ -167,41 +193,44 @@ func (spf *CallTreeSPF) getVertex() error {
 	return nil
 }
 
-func dumpFuncList(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-Type", "image/svg+xml")
-	s := svg.New(w)
-	h := 15
-	sw := 500
-	sh := 500
-	s.Start(100000, 100000)
-	for v, _ := range CTreeRoot.list {
-		s.Roundrect(sw, sh, len(v)*5, h, 1, 1, "fill:none;stroke:black")
-		s.Text((sw+len(v)*5)-(len(v)*5)/2, sh+10, v, "text-anchor:middle;font-size:5px;fill:black")
-
-		sw += len(v)*5 + 20
-	}
-	s.End()
-}
-
 func showFuncList(w http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
 	fmt.Println("Path: ", req.URL.Path)
-	var funcList = CFuncs{Funcs: make([]string, 0, len(CTreeRoot.list))}
-
 	if req.URL.Path == "/" {
-		for fn, fi := range CTreeRoot.list {
-			if len(fi.calling) == 0 {
-				continue
+		instances := CInstances{Inst: make([]*CInstance, 0, len(CTreeRoot.instances))}
+		fmt.Println(len(CTreeRoot.instances))
+		for _, i := range CTreeRoot.instances {
+			inst := new(CInstance)
+			inst.Root = i.root.name
+			inst.Index = i.index
+			inst.Funcs = make([]*Temp, 0, len(i.list))
+			for fn, fi := range i.list {
+				if len(fi.calling) == 0 {
+					continue
+				}
+				t := new(Temp)
+				t.Name = fn
+				t.Index = inst.Index
+				inst.Funcs = append(inst.Funcs, t)
 			}
-			funcList.Funcs = append(funcList.Funcs, fn)
+			instances.Inst = append(instances.Inst, inst)
 		}
+
+		/*
+			fmt.Println(len(instances.Inst))
+			for _, j := range instances.Inst {
+				fmt.Println(j.Root + "===============")
+				for _, s := range j.Funcs {
+					fmt.Println(s)
+				}
+			}
+		*/
 		t, err := template.New("main").Parse(tmpl)
 		if err != nil {
 			fmt.Println(err.Error())
 			return
 		}
-		t.Execute(w, funcList)
-
+		t.Execute(w, instances)
 		return
 	}
 
@@ -210,15 +239,26 @@ func showFuncList(w http.ResponseWriter, req *http.Request) {
 
 func createFuncGraph(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(r.URL.Path[1:])
-	if fn, ok := CTreeRoot.list[r.URL.Path[1:]]; ok {
-		spf := new(CallTreeSPF)
-		spf.root = fn.name
-		spf.level = 0
-		spf.getVertex()
-		buildFuncCallTreeGraph(spf)
-		drawFuncCallTree(w, spf)
+
+	p := strings.Split(r.URL.Path, "-----")
+	index, _ := strconv.ParseInt(p[1], 10, 32)
+	fmt.Println(index)
+	fmt.Println(p[0])
+	if int(index) < len(CTreeRoot.instances) {
+		inst := CTreeRoot.instances[index]
+		if fn, ok := inst.list[p[0][1:len(p[0])]]; ok {
+			spf := new(CallTreeSPF)
+			spf.root = fn.name
+			spf.level = 0
+			spf.index = inst.index
+			spf.getVertex(inst)
+			buildFuncCallTreeGraph(spf)
+			drawFuncCallTree(w, spf)
+		} else {
+			io.WriteString(w, "Not exist in global list\n")
+		}
 	} else {
-		io.WriteString(w, "No exit in global list\n")
+		io.WriteString(w, "----------Not exist in global list--------------\n")
 	}
 }
 
@@ -274,7 +314,8 @@ func drawFuncCallTree(w http.ResponseWriter, spf *CallTreeSPF) {
 	for _, row := range constGraph.rows {
 		for _, g := range row.element {
 			s.Roundrect(g.x, g.y, g.w, g.h, 1, 1, "fill:none;stroke:black")
-			s.Link(g.name, g.name)
+			href := fmt.Sprintf("%s-----%d", g.name, spf.index)
+			s.Link(href, g.name)
 			s.Text(g.tx, g.ty, g.name, "text-anchor:middle;font-size:5px;fill:black")
 			s.LinkEnd()
 		}
@@ -282,7 +323,7 @@ func drawFuncCallTree(w http.ResponseWriter, spf *CallTreeSPF) {
 
 	for _, v := range spf.vertex {
 		for _, subv := range v.children {
-			s.Line(constGraph.graphs[v.fn.name].dmpx, constGraph.graphs[v.fn.name].dmpy, constGraph.graphs[subv.fn.name].umpx, constGraph.graphs[subv.fn.name].umpy, "fill:none;stroke:black")
+			s.Line(constGraph.graphs[v.fn.name].dmpx, constGraph.graphs[v.fn.name].dmpy, constGraph.graphs[subv.fn.name].umpx, constGraph.graphs[subv.fn.name].umpy, "fill:none;stroke:green")
 		}
 	}
 	s.End()
@@ -321,15 +362,15 @@ func getFuncBody(buf string, figure string) string {
 	return body
 }
 
-func buildCallTree() {
-	for fn, fi := range CTreeRoot.list {
+func buildCallTree(inst *CFuncInstance) {
+	for fn, fi := range inst.list {
 		if fi.body == "" {
-			CTreeRoot.list[fn].calling = nil
+			inst.list[fn].calling = nil
 			continue
 		}
 
-		CTreeRoot.list[fn].calling = make([]*CFunc, 0, 10)
-		fmt.Println(fn + " Body: " + fi.body)
+		inst.list[fn].calling = make([]*CFunc, 0, 10)
+		//fmt.Println(fn + " Body: " + fi.body)
 		current := 0
 		fstart := current
 		insub := 0
@@ -339,7 +380,7 @@ func buildCallTree() {
 			if c == ')' && insub == 0 {
 				fn_name := fi.body[fstart : current-2]
 				//				fmt.Println(fn_name)
-				CTreeRoot.list[fn].calling = append(CTreeRoot.list[fn].calling, CTreeRoot.list[fn_name])
+				inst.list[fn].calling = append(inst.list[fn].calling, inst.list[fn_name])
 
 				if fi.body[current] == '{' {
 					insub = 1
@@ -389,63 +430,100 @@ func main() {
 	//fmt.Println(string(buf))
 	//fmt.Println(strings.TrimRight(string(buf), " "))
 	s := string(buf)
-	if FetchRootName.MatchString(s) {
-		root := new(CFunc)
-		//fmt.Println(root.name)
-		root.name = FetchRootName.FindStringSubmatch(s)[1][:len(FetchFunctionName.FindStringSubmatch(s)[1])-2]
-		root.body = getFuncBody(s, root.name+"()")
-		//	fmt.Println(root.name)
-		CTreeRoot.root = root
-		//fmt.Println(CTreeRoot)
-
-	}
-	if RemoveUselessInformation.MatchString(s) {
-		s = RemoveUselessInformation.ReplaceAllString(s, "")
-		//	fmt.Println(s)
-	}
 
 	s = RemoveCComment.ReplaceAllString(s, "")
 	s = RemoveCPPComment.ReplaceAllString(s, "")
-	s = RemoveFileHead.ReplaceAllString(s, "")
-	s = RemoveFileTail.ReplaceAllString(s, "")
-	s = strings.Replace(s, " ", "", -1)
-	s = strings.Replace(s, "\t", "", -1)
-	line := strings.Split(s, "\n")
-	var count = 0
-	for _, l := range line {
-		if FetchFunctionName.MatchString(l) {
-			count = count + 1
-		}
-		//fmt.Println(l)
-	}
+	s = RemoveUselessInformation.ReplaceAllString(s, "")
 
-	s = strings.Replace(s, "\n", "", -1)
-	//fmt.Println(s)
-	CTreeRoot.list = make(map[string]*CFunc, count)
-	CTreeRoot.list[CTreeRoot.root.name] = CTreeRoot.root
-	for _, l := range line {
-		if FetchFunctionName.MatchString(l) {
-			if _, ok := CTreeRoot.list[FetchFunctionName.FindStringSubmatch(l)[1]]; ok {
+	if FetchRootName.MatchString(s) {
+		CTreeRoot.name = FetchRootName.FindStringSubmatch(s)[1][:len(FetchFunctionName.FindStringSubmatch(s)[1])-2]
+		CTreeRoot.instances = make([]*CFuncInstance, 0, strings.Count(s, CTreeRoot.name+"()"))
+		//fmt.Println(strings.Count(s, CTreeRoot.name+"()"))
+
+		s = RemoveFileTail.ReplaceAllString(s, "")
+		s = RemoveFileHead.ReplaceAllString(s, "")
+		index := 0
+		for n, c := range strings.Split(s, CTreeRoot.name+"()") {
+			if n == 0 {
 				continue
 			}
-			new_fn := new(CFunc)
-			new_fn.name = FetchFunctionName.FindStringSubmatch(l)[1][:len(FetchFunctionName.FindStringSubmatch(l)[1])-2]
-			new_fn.body = getFuncBody(s, new_fn.name+"()")
-			CTreeRoot.list[new_fn.name] = new_fn
+			cont := 0
+			for _, i := range CTreeRoot.instances {
+				if strings.EqualFold(c, i.root.body) {
+					cont = 1
+				}
+			}
+			if cont == 1 {
+				continue
+			}
+
+			fmt.Println(c)
+			c = strings.Replace(c, "\t", "", -1)
+			c = strings.Replace(c, " ", "", -1)
+			c = strings.Replace(c, "\n", "", -1)
+			fmt.Println(c)
+			inst := new(CFuncInstance)
+			root := new(CFunc)
+			root.name = CTreeRoot.name
+			//fmt.Println(c)
+			root.body = getFuncBody(root.name+"()"+c, root.name+"()")
+			fmt.Println(root.body)
+			inst.index = index
+			inst.root = root
+			CTreeRoot.instances = append(CTreeRoot.instances, inst)
+			index++
 		}
 	}
+	for _, i := range CTreeRoot.instances {
+		b := i.root.body
 
-	buildCallTree()
-	for fn, fi := range CTreeRoot.list {
-		fmt.Println(fn)
-		fmt.Println("----------------------------------")
-		for _, f := range fi.calling {
-			fmt.Println("+" + f.name)
+		line := strings.Split(b, "()")
+		var count = 0
+		for _, l := range line {
+			if FetchFunctionName.MatchString(l + "()") {
+				count = count + 1
+			}
+			//fmt.Println(l)
 		}
-	}
 
+		//fmt.Println(b)
+		i.list = make(map[string]*CFunc, count)
+		i.list[i.root.name] = i.root
+		for _, l := range line {
+			if FetchFunctionName.MatchString(l + "()") {
+				if _, ok := i.list[FetchFunctionName.FindStringSubmatch(l + "()")[1]]; ok {
+					continue
+				}
+				new_fn := new(CFunc)
+				new_fn.name = FetchFunctionName.FindStringSubmatch(l + "()")[1][:len(FetchFunctionName.FindStringSubmatch(l + "()")[1])-2]
+				new_fn.body = getFuncBody(b, new_fn.name+"()")
+				i.list[new_fn.name] = new_fn
+			}
+		}
+
+		/*
+			for _, in := range CTreeRoot.instances {
+				//	fmt.Println("++++++++++++++++++++++++++++++++")
+				//	fmt.Println(CTreeRoot.name)
+				//for _, fn := range in.list {
+					//		fmt.Println("----------------------------------")
+					//		fmt.Println(fn.name)
+				}
+			}
+		*/
+
+		buildCallTree(i)
+		/*
+			for fn, fi := range i.list {
+				fmt.Println(fn)
+				fmt.Println("----------------------------------")
+				for _, f := range fi.calling {
+					fmt.Println("+" + f.name)
+				}
+			}
+		*/
+	}
 	http.Handle("/", http.HandlerFunc(showFuncList))
-	http.Handle("/circle", http.HandlerFunc(dumpFuncList))
 	err = http.ListenAndServe(":2003", nil)
 	if err != nil {
 		fmt.Println(err.Error())
